@@ -1,0 +1,63 @@
+CREATE DATABASE KitabxanaDb
+
+CREATE TABLE Authors
+(
+Id INT PRIMARY KEY IDENTITY,
+Name NVARCHAR(50) NOT NULL,
+Surname NVARCHAR(50) NOT NULL
+)
+
+CREATE TABLE Books
+(
+Id INT PRIMARY KEY IDENTITY,
+Name NVARCHAR(50) NOT NULL,
+PageCount INT NOT NULL,
+AuthorId INT FOREIGN KEY REFERENCES Authors(Id)
+)
+
+
+CREATE VIEW VW_ALL_ABOUT_BOOK
+AS
+SELECT B.Id, B.Name, B.PageCount, CONCAT(A.Name, ' ', A.Surname) AS 'AuthorFullName'
+FROM Books AS B
+JOIN Authors AS A
+ON A.Id = B.AuthorId
+
+SELECT * FROM VW_ALL_ABOUT_BOOK
+
+
+
+CREATE PROCEDURE USP_SEARCHING_FOR_NAME @name NVARCHAR(100)
+AS
+SELECT B.Id, B.Name, B.PageCount, CONCAT(A.Name, ' ', A.Surname) AS 'AuthorFullName'
+FROM Books AS B
+JOIN Authors AS A
+ON A.Id = B.AuthorId
+WHERE  B.Name LIKE @name OR A.Name LIKE @name OR A.Surname LIKE @name  --CONTAINS(B.Name, @name) OR CONTAINS(A.Name, @name) OR CONTAINS(A.Surname, @name)
+
+EXEC USP_SEARCHING_FOR_NAME 'OrwELL'
+EXEC USP_SEARCHING_FOR_NAME 'Fareler ve insanlar'
+EXEC USP_SEARCHING_FOR_NAME 'John'
+
+
+
+
+CREATE VIEW VW_ALL_ABOUT_AUTHORS
+AS
+SELECT A.Id, CONCAT(A.Name, ' ', A.Surname) AS 'AuthorFullName', COUNT(B.Id) AS 'BookCount', MAX(B.PageCount) AS 'MaxPageCount'
+FROM Authors AS A
+LEFT JOIN Books AS B
+ON A.Id = B.AuthorId
+GROUP BY A.Id, A.Name, A.Surname
+
+DROP VIEW VW_ALL_ABOUT_AUTHORS
+
+SELECT * FROM VW_ALL_ABOUT_AUTHORS
+
+
+
+
+
+
+
+
